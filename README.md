@@ -1,5 +1,4 @@
-## PopR_IDFG
-###PopR Issue Tracking.  
+##PopR Issue Tracking.  
 
 PopR code for IDFG's website is housed in a private repository.
 
