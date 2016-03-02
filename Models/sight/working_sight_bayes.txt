@@ -1,0 +1,104 @@
+		model{
+		
+			#  Group size model, strat specific
+			#  Priors
+			lambda_a ~ dunif(.001, 100)
+			lambda_b ~ dunif(.001, 5)
+			
+			for(h in 1:nstrat){
+				#mu[h] ~ dnorm(obs_mu_y[h], 0.001*1/obs_sd_y[h]^2)
+				#sigma_y[h] ~ dunif(0.001*obs_sd_y[h], 100*obs_sd_y[h])
+				lambda[h] ~ dgamma(lambda_a[h], lambda_b[h])
+			}
+			
+			#  Loop over groups, log of group size on left
+			for(j in 1:ngroups){
+				#y[j] ~ dnorm(mu[strat[j]], 1/(sigma_y[strat[j]] ^ 2))
+				y[j] ~ dpois(lambda[strat[j]])
+			}			
+			
+			#  Models for imputation of missing covariate values
+			for(h in 1:nstrat){
+				#  Strat specific prior on probability of group authenticity
+				psi[h] ~ dbeta(1, 1)
+								
+				#  Activity covariate prior
+				#for(i in 1:3){
+				#	pact[h,i] ~ dbeta(1,1)
+				#}
+				
+				#  Veg Type covariate prior
+				#for(i in 1:5){
+				#	pveg[h,i] ~ dbeta(1,1)
+				#}
+				
+				#  Snow Cover covariate prior
+				#for(i in 1:3){
+				#	psnow[h,i] ~ dbeta(1,1)
+				#}
+				
+			}
+			
+			#  Coefficients, informative priors from prior sightability analysis
+			#b ~ dmnorm(est_coef[], est_sigma[,])			
+			#b ~ dmnorm(est_coef[], Sigma[,])
+			#for(i in 1:10){
+			#	for(j in 1:10){
+			#		R[i,j] <- equals(i, j)
+			#	}
+			#}
+			#Omega[1:10, 1:10] ~ dwish(R[,], 9)
+			#Sigma[1:10, 1:10] <- inverse(Omega[,])			
+			b[1] ~ dnorm(-0.249895, 10)T(-10, 10)
+			b[2] ~ dnorm(0.059483, 10)T(-10, 10)
+			muy <- mean(y[])
+			
+			for(j in 1:ngroups){
+				#  Indicator value for groups authenticity
+				q[j] ~ dbern(psi[strat[j]])
+				
+				#  Priors on covariate values
+				#obs_act[j] ~ dcat(pact[strat[j],])
+				#obs_veg[j] ~ dcat(pveg[strat[j],])
+				#obs_snow[j] ~ dcat(psnow[strat[j],])
+				
+				#  Build design matrix
+				#dm[j,1] <- 1
+				#for(a in 2:3){
+				#	dm[j,a] <- equals(obs_act[j], a)
+				#}
+				#for(v in 2:5){
+				#	dm[j,v+2] <- equals(obs_veg[j], v)
+				#}
+				#for(s in 2:3){
+				#	dm[j,s+6] <- equals(obs_snow[j], s)
+				#}
+				#dm[j,10] <- exp(y[j])	
+
+				#  Linear predictor on sightability
+				logit(p[j]) <- b[1]  + b[2] * ((y[j] + 1 - 9)/12)
+
+				#  Observed group state, real and not
+				z[j] ~ dbern(q[j] * p[j])
+			
+			}
+
+			#  Stratum population size derivation
+			for(h in 1:nstrat){
+				for(j in 1:ngroups){
+					n_strat[h,j] <- (y[j] + 1) * q[j] * equals(strat[j], h)
+				}
+				#  Strat specific pop estimates
+				N_strat[h] <- sum(n_strat[h,])				
+			}
+			
+			#  Total sampled population estimate	
+			N_sampled <- sum(N_strat[])
+			
+			#  Total number of groups
+			M <- sum(q[])
+			
+			#  Proportion of groups observed - sightability
+			prop_grps <- sum(z[])/M
+			
+		}

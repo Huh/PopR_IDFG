@@ -1,0 +1,57 @@
+		model{
+		
+			#  Group size model, strat specific
+			#  Priors
+			lambda_a ~ dunif(.001, 400)
+			lambda_b ~ dunif(.001, 100)
+			
+			for(h in 1:nstrat){
+				lambda[h] ~ dgamma(lambda_a, lambda_b)
+			}
+			
+			#  Loop over groups, log of group size on left
+			for(j in 1:ngroups){
+				y[j] ~ dpois(lambda[strat[j]])
+			}			
+			
+			#  Models for imputation of missing covariate values
+			for(h in 1:nstrat){
+				#  Strat specific prior on probability of group authenticity
+				psi[h] ~ dbeta(1, 1)
+
+			}
+			
+			#  Coefficients, informative priors from prior sightability analysis
+			b ~ dmnorm(est_coef[], est_sigma[,])
+			
+			for(j in 1:ngroups){
+				#  Indicator value for groups authenticity
+				q[j] ~ dbern(psi[strat[j]])
+				
+				#  Linear predictor on sightability
+				logit(p[j]) <- b[1] + b[10] * y[j]
+
+				#  Observed group state, real and not
+				z[j] ~ dbern(q[j] * p[j])
+			
+			}
+
+			#  Stratum population size derivation
+			for(h in 1:nstrat){
+				for(j in 1:ngroups){
+					n_strat[h,j] <- (y[j] + 1) * q[j] * equals(strat[j], h)
+				}
+				#  Strat specific pop estimates
+				N_strat[h] <- sum(n_strat[h,])				
+			}
+			
+			#  Total sampled population estimate	
+			N_sampled <- sum(N_strat[])
+			
+			#  Total number of groups
+			M <- sum(q[])
+			
+			#  Proportion of groups observed - sightability
+			prop_grps <- sum(z[])/M
+			
+		}
