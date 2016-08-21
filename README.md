@@ -2,7 +2,10 @@
 
 PopR code for IDFG's website is housed in a private repository.
 
-The purpose of this repository is to allow public commenting on issues and to allow for suggested enhancements.
+The purpose of this repository is to allow public commenting on issues and to allow for suggested enhancements.  In addition, many of the models that PopR runs are contained in the model file in this repository.  
+
+###Help
+A general overview and detailed information regarding PopR can be found at [this link](https://github.com/Huh/PopR_IDFG/wiki).
 
 ###Reporting
 If you think you have found a bug or wish to see a feature added to the website please place your comments at the following
@@ -13,3 +16,4 @@ When you have a problem with the website please try to describe the set of condi
 
 ####Enhancements
 To make enhancement suggestions most useful please describe the current feature, if it exists, the problems with it and then the advantages of the new version you would like to see implemented.  The better you describe the enhancement the more likely we are to get it right.
+
